@@ -1,5 +1,3 @@
-// types/index.ts (Complet)
-
 /**
  * Représente une chaîne (Live TV)
  */
@@ -54,14 +52,11 @@ export interface Series {
   seasons: Season[];
 }
 
-// --- GESTION DES PROFILS (Identique) ---
 export interface M3UProfile { id: string; name: string; type: 'm3u'; url: string; epgUrl?: string; }
 export interface XtreamProfile { id: string; name: string; type: 'xtream'; serverUrl: string; username: string; password?: string; }
 export interface StalkerProfile { id: string; name: string; type: 'stalker'; portalUrl: string; macAddress: string; }
 export type IPTVProfile = M3UProfile | XtreamProfile | StalkerProfile;
 
-
-// --- CONTEXTE (Mis à jour) ---
 export type IPTVContextType = {
   profiles: IPTVProfile[];
   currentProfile: IPTVProfile | null;
@@ -77,10 +72,10 @@ export type IPTVContextType = {
 
   addProfile: (profile: IPTVProfile) => Promise<void>;
   removeProfile: (id: string) => Promise<void>;
-  editProfile: (updatedProfile: IPTVProfile) => Promise<void>; // <-- NOUVELLE LIGNE
+  editProfile: (updatedProfile: IPTVProfile) => Promise<void>;
   loadProfile: (profile: IPTVProfile) => Promise<void>;
   unloadProfile: () => void;
-  setCurrentProfile: (profile: IPTVProfile | null) => void; // (Maintenant inclus)
+  setCurrentProfile: (profile: IPTVProfile | null) => void;
   
   playStream: (stream: { url: string; id: string; }) => void;
 };

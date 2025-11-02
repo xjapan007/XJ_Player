@@ -1,5 +1,3 @@
-// screens/HomeScreen.tsx (Complet et Corrigé)
-
 import React from 'react';
 import { View, StyleSheet, Text, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,11 +13,9 @@ import SeriesList from '../components/SeriesList';
 
 const Tab = createMaterialTopTabNavigator();
 
-// --- CORRECTION DU CRASH ICI ---
 const MediaTabs = () => {
   const { channels, movies, series, isLoading } = useIPTV();
-
-  // Si le profil est en cours de chargement, on affiche un spinner
+  
   if (isLoading) {
     return (
       <View style={styles.centeredContainer}>
@@ -29,8 +25,7 @@ const MediaTabs = () => {
   }
 
   const totalCount = channels.length + movies.length + series.length;
-  
-  // Si le profil est chargé mais vide, on affiche un message
+    
   if (totalCount === 0) {
     return (
       <View style={styles.centeredContainer}>
@@ -38,8 +33,7 @@ const MediaTabs = () => {
       </View>
     );
   }
-
-  // Sinon, on affiche les onglets
+  
   return (
     <Tab.Navigator
       screenOptions={{
@@ -74,8 +68,6 @@ const MediaTabs = () => {
     </Tab.Navigator>
   );
 };
-// --- FIN DE LA CORRECTION DU CRASH ---
-
 
 const HomeScreen = () => {
   const { currentProfile, unloadProfile, profiles, loadProfile } = useIPTV();
@@ -95,7 +87,6 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {currentProfile ? (
-        // --- Vue "Profil Chargé" ---
         <View style={styles.container}>
           <View style={styles.header}>
             <Picker
@@ -109,7 +100,6 @@ const HomeScreen = () => {
                   key={profile.id} 
                   label={profile.name}
                   value={profile.id}
-                  // --- CORRECTION DU STYLE ANDROID (Texte blanc sur blanc) ---
                   color={Platform.OS === 'android' ? '#000' : '#FFF'}
                 />
               ))}
@@ -124,7 +114,6 @@ const HomeScreen = () => {
           <MediaTabs />
         </View>
       ) : (
-        // --- Vue "Aucun Profil" ---
         <PlaylistManager />
       )}
     </SafeAreaView>
@@ -145,10 +134,9 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: '100%',
-    color: '#FFF', // Couleur du texte SÉLECTIONNÉ
+    color: '#FFF', 
     backgroundColor: '#1A1A1A',
   },
-  // Style pour les messages "Chargement" ou "Profil Vide"
   centeredContainer: {
     flex: 1,
     justifyContent: 'center',

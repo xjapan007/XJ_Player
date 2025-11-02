@@ -1,5 +1,3 @@
-// components/ChannelList.tsx (Complet)
-
 import React from 'react';
 import { 
   View, Text, SectionList, TouchableOpacity, StyleSheet,
@@ -20,10 +18,7 @@ const ChannelList = () => {
     playStream({ url: channel.url, id: channel.id });
     navigation.navigate('Player');
   };
-
-  // --- TRANSFORMATION DES DONNÉES ---
-  // On transforme la liste plate [a, b, c] en une liste groupée
-  // [{ title: "Groupe 1", data: [a, b] }, { title: "Groupe 2", data: [c] }]
+    
   const groupedData = React.useMemo(() => {
     if (channels.length === 0) return [];
     
@@ -37,14 +32,13 @@ const ChannelList = () => {
       return acc;
     }, {} as Record<string, Channel[]>);
 
-    // 2. On transforme l'objet en tableau pour la SectionList
-    return Object.keys(groups).sort().map(title => ({ // .sort() pour trier par ordre alphabétique
+    
+    return Object.keys(groups).sort().map(title => ({ 
       title: title,
       data: groups[title]
     }));
   }, [channels]);
-  // --- FIN DE LA TRANSFORMATION ---
-
+  
   // Rendu d'un item (une chaîne)
   const renderItem = ({ item }: { item: Channel }) => (
     <TouchableOpacity 
@@ -107,7 +101,6 @@ const ChannelList = () => {
   );
 };
 
-// --- STYLES MIS À JOUR ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,

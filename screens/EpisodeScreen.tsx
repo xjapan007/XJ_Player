@@ -1,8 +1,5 @@
-// screens/EpisodeScreen.tsx (Complet)
-
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-// --- CORRECTION ICI ---
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../App';

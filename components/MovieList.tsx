@@ -1,5 +1,3 @@
-// components/MovieList.tsx (Complet)
-
 import React from 'react';
 import { 
   View, Text, SectionList, TouchableOpacity, StyleSheet,
@@ -20,8 +18,7 @@ const MovieList = () => {
     playStream({ url: movie.streamUrl, id: movie.id });
     navigation.navigate('Player');
   };
-
-  // --- TRANSFORMATION DES DONNÉES ---
+  
   const groupedData = React.useMemo(() => {
     if (movies.length === 0) return [];
     
@@ -39,8 +36,7 @@ const MovieList = () => {
       data: groups[title]
     }));
   }, [movies]);
-  // --- FIN DE LA TRANSFORMATION ---
-
+  
   const renderItem = ({ item }: { item: Movie }) => (
     <TouchableOpacity 
       style={styles.item} 
@@ -92,7 +88,6 @@ const MovieList = () => {
   );
 };
 
-// --- STYLES MIS À JOUR ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,

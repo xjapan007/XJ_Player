@@ -1,10 +1,9 @@
-// app.json (Complet)
 {
   "expo": {
     "name": "newsuperxjplayer",
     "slug": "newsuperxjplayer",
     "version": "1.0.0",
-    "orientation": "default", // <-- AUTORISE LA ROTATION
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {

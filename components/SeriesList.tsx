@@ -1,12 +1,9 @@
-// components/SeriesList.tsx (Complet)
-
 import React from 'react';
 import { 
   View, Text, SectionList, TouchableOpacity, StyleSheet,
   Image, ActivityIndicator
 } from 'react-native';
 import { useIPTV } from '../context/IPTVContext';
-// --- CORRECTION ICI ---
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../App';
@@ -92,7 +89,7 @@ const SeriesList = () => {
     </View>
   );
 };
-// ... (les styles sont identiques)
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#121212' },
   header: { fontSize: 16, fontWeight: 'bold', color: '#FFF', backgroundColor: '#222', padding: 10 },

@@ -1,5 +1,3 @@
-// components/VideoPlayer.tsx (Complet)
-
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { Video, ResizeMode } from 'expo-av'; 
@@ -20,12 +18,11 @@ const VideoPlayer = () => {
           
           useNativeControls 
           resizeMode={ResizeMode.CONTAIN}
-          shouldPlay // Démarre la lecture automatiquement
-
-          // --- AJOUTS POUR FORCER LE SON ---
+          shouldPlay 
+          
           isMuted={false}
           volume={1.0}
-          // --- FIN DES AJOUTS ---
+          
         />
       ) : (
         <View style={styles.placeholder}>

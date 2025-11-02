@@ -1,13 +1,9 @@
-// App.tsx (Complet - Audio.setAudioModeAsync SUPPRIMÉ)
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { IPTVProvider } from './context/IPTVContext';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-// Importez tous les écrans
 import HomeScreen from './screens/HomeScreen';
 import PlayerScreen from './screens/PlayerScreen';
 import SeasonScreen from './screens/SeasonScreen';
@@ -24,8 +20,7 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
-  // Le bloc useEffect pour Audio.setAudioModeAsync a été supprimé
-
+  
   return (
     <SafeAreaProvider>
       <IPTVProvider>

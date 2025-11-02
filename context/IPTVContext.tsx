@@ -1,5 +1,3 @@
-// context/IPTVContext.tsx (Complet)
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
@@ -26,8 +24,7 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentStream, setCurrentStream] = useState<{ url: string; id: string; } | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  // ... (useEffect / loadProfilesFromStorage est identique)
+ 
   useEffect(() => {
     const loadProfilesFromStorage = async () => {
       try {
@@ -71,8 +68,7 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Failed to remove profile", e);
     }
   };
-  
-  // --- NOUVELLE FONCTION "EDIT" ---
+    
   const editProfile = async (updatedProfile: IPTVProfile) => {
     try {
       const newProfiles = profiles.map(profile => 
@@ -80,8 +76,7 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       setProfiles(newProfiles);
       await AsyncStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(newProfiles));
-
-      // Si le profil modifié est celui en cours, on le met à jour
+      
       if (currentProfile?.id === updatedProfile.id) {
         setCurrentProfile(updatedProfile);
       }
@@ -89,8 +84,7 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Failed to edit profile", e);
     }
   };
-  // --- FIN DE LA NOUVELLE FONCTION ---
-
+  
   const loadProfile = async (profile: IPTVProfile) => {
     setIsLoading(true);
     setError(null);
@@ -127,7 +121,6 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loadM3U = async (url: string) => {
-    // ... (la fonction loadM3U est identique)
     let m3uContent = '';
     try {
       const response = await fetch(url);
@@ -153,7 +146,6 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const parseM3U = (m3uContent: string): { channels: Channel[], movies: Movie[], series: Series[] } => {
-    // ... (la fonction parseM3U est identique)
     const lines = m3uContent.split('\n');
     const channels: Channel[] = [];
     const movies: Movie[] = [];
@@ -236,10 +228,10 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error,
         addProfile,
         removeProfile,
-        editProfile, // <-- NOUVELLE FONCTION AJOUTÉE
+        editProfile, 
         loadProfile,
         unloadProfile,
-        setCurrentProfile, // <-- FONCTION AJOUTÉE
+        setCurrentProfile, 
         playStream,
       }}
     >
