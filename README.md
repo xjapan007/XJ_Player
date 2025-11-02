@@ -1,70 +1,79 @@
-# React Native IPTV Player (Help Wanted!)
+# XJ_Player: A React Native IPTV Player (HELP WANTED!)
+
+![Project Header Image](./assets/images/header.jpg)
 
 This is an open-source IPTV player for iOS and Android, built with React Native and Expo.
 
-The project is in the early stages of development and is currently **unstable**. We are actively looking for contributors to help us find and fix bugs, and implement new features.
+The project is in the early stages of development and is currently **unstable**. We are actively looking for collaborators to help us fix a critical bug, implement new features, and build a powerful, community-driven media player.
 
 ---
 
-## 🚩 The Current Problem
+## 🚩 The Critical Bug (Priority #1)
 
-We are currently blocked by a persistent bug:
+The app is currently **unusable** due to a silent crash that blocks all development.
 
-* The Metro server (or the app) crashes silently (server stops) when loading an M3U profile.
-* This happens after the `LOG Chargement du profil...` message appears.
-* We suspect a problem with the M3U parser, a `Require cycle` cache issue, or something similar.
-* **We are looking for experienced developers to help us debug and fix this core issue.**
+**How to Replicate:**
+1.  Launch the app.
+2.  Add a new M3U profile (using a valid M3U URL).
+3.  Click the "Load" button for that profile.
+4.  The terminal shows `LOG Chargement du profil: [Profile Name]`...
+5.  ...and then the Metro server **immediately stops (`› Stopped server`)** without any error message.
 
----
+**What We Suspect:**
+This silent crash is likely caused by one of these two issues:
 
-## ✨ Features & To-Do List
+1.  **A bug in the M3U parser:** The parser in `context/IPTVContext.tsx` (the `parseM3U` function) might be failing silently when it tries to parse the M3U file, crashing the whole server.
+2.  **A "Require Cycle":** The logs sometimes show `WARN Require cycle: components/VideoPlayer.tsx`. This cache bug might be putting the app in an unstable state, causing it to crash on load.
 
-Here is a list of features we want to build. Any help is welcome!
-
-### Core
-* [ ] **Fix the critical server crash on profile load!**
-* [ ] Investigate and fix the `WARN Require cycle: components/VideoPlayer.tsx` warning.
-* [ ] Fix potential issue where clicking on a channel does not work.
-
-### Profile Management
-* [X] Add M3U Profile (by URL)
-* [X] Save profiles to device (`AsyncStorage`)
-* [X] Delete profile
-* [ ] **Implement Xtream Codes API Login**
-* [ ] **Implement Stalker Portal (MAC Address) Login**
-* [ ] Add "Edit" profile functionality
-
-### Player
-* [X] Basic video playback (`expo-video`)
-* [X] Native controls (play, pause, fullscreen, mute)
-* [X] Screen rotation (landscape/portrait)
-* [ ] Add "Fast Forward" / "Rewind" buttons.
-
-### UI / Features
-* [ ] **Implement Tabbed Navigation** (Live TV, Movies, Series).
-* [ ] Create `MovieList` and `SeriesList` components.
-* [ ] Parse and display EPG (XMLTV) data.
-* [ ] Group channels, movies, and series by their "group-title".
-* [ ] Add a search bar.
+We need help debugging this parser or fixing the cache/cycle issue. **The project is blocked until this is fixed.**
 
 ---
 
-## 🚀 How to Contribute
+## 🚀 Feature Roadmap / To-Do List
 
-1.  **Fork** this repository.
-2.  Create a new branch (`git checkout -b feature/my-new-feature` or `bugfix/fix-the-crash`).
-3.  Make your changes.
-4.  **Submit a Pull Request** with a clear description of what you've done.
+Once the crash is fixed, here is what we need to build. Help on any of these items is welcome!
+
+### Core API & Parsers
+* `[ ]` **Fix M3U Parser:** Make the current `parseM3U` function robust and error-proof.
+* `[ ]` **Implement Xtream Codes API:**
+    * Add "Xtream Codes" as a profile type in the `PlaylistManager`.
+    * Create a service (`xtreamService.ts`) to handle the login (Server, User, Pass).
+    * Fetch and parse categories (Live, VOD, Series) from the Xtream API.
+    * Fetch and parse the stream lists for each category.
+* `[ ]` **Implement Stalker Portal API:**
+    * Add "Stalker (MAC)" as a profile type.
+    * Create a service (`stalkerService.ts`) to handle portal login (Portal URL, MAC Address).
+    * Parse the Stalker JSON-RPC responses for channels.
+* `[ ]` **Implement EPG Parser:**
+    * Fetch the `epg_url` provided by the M3U or Xtream API.
+    * Parse the `XMLTV` data (likely needs an `xml2js` library).
+    * Store and display EPG data (current/next program) for channels.
+* `[ ]` **Handle HTTP Headers:**
+    * Allow users to add custom HTTP `User-Agent` and `Referer` headers for streams that require them.
+
+### UI / UX
+* `[ ]` **Implement Tabbed Navigation:** On the `HomeScreen`, replace the single `ChannelList` with a Tab Navigator to show:
+    * "Live TV" (`ChannelList`)
+    * "Movies" (`MovieList`)
+    * "Series" (`SeriesList`)
+* `[ ]` **Create `MovieList` / `SeriesList`:** Create new components to display the lists of movies and series from the context.
+* `[ ]` **Profile Editing:** Add an "Edit" button next to "Delete" in the `PlaylistManager`.
+
+### Bug Fixes
+* `[ ]` **Investigate `Require cycle` warning:** Find the source of the `WARN Require cycle: components/VideoPlayer.tsx` and refactor to remove it.
+* `[ ]` **Fix Click Issue:** The `onPress` on `ChannelList` items sometimes fails (likely related to the `Require cycle` bug).
+
+---
 
 ## 🛠️ Getting Started (How to run the project)
 
 1.  Clone this repository:
     ```bash
-    git clone https://github.com/xjapan007/XJ_Player
+    git clone [https://github.com/xjapan007/XJ_Player.git](https://github.com/xjapan007/XJ_Player.git)
     ```
 2.  Navigate to the project directory:
     ```bash
-    cd react-native-iptv-player
+    cd XJ_Player
     ```
 3.  Install dependencies:
     ```bash
@@ -75,6 +84,15 @@ Here is a list of features we want to build. Any help is welcome!
     npx expo start
     ```
 5.  Scan the QR code with the **Expo Go** app on your phone.
+
+---
+
+## 🤝 How to Contribute
+
+1.  **Fork** this repository.
+2.  Create a new branch (`git checkout -b feature/my-new-feature` or `bugfix/fix-the-crash`).
+3.  Make your changes.
+4.  **Submit a Pull Request** with a clear description of what you've done.
 
 ---
 
