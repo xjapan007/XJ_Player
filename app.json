@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "newsuperxjplayer",
+    "name": "Super XJ Player",
     "slug": "newsuperxjplayer",
     "version": "1.0.0",
     "orientation": "default",
@@ -25,6 +25,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-asset",
+      "react-native-vlc-media-player"
+    ]
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -8,72 +8,91 @@ import {
   FlatList, 
   TouchableOpacity,
   ActivityIndicator,
-  Alert
+  Alert,
+  Platform // Importé pour le style du Picker
 } from 'react-native';
 import { useIPTV } from '../context/IPTVContext';
-import { IPTVProfile, M3UProfile } from '../types';
+import { IPTVProfile, M3UProfile, XtreamProfile, ProfileType } from '../types'; 
+import { Picker } from '@react-native-picker/picker';
 
 const PlaylistManager = () => {
   const { 
-    addProfile, 
-    removeProfile,
-    editProfile, 
-    profiles, 
-    loadProfile, 
-    isLoading, 
-    error,
-    currentProfile 
+    addProfile, removeProfile, editProfile, profiles, 
+    loadProfile, isLoading, error, currentProfile 
   } = useIPTV();
   
+  const [profileType, setProfileType] = useState<ProfileType>('m3u');
   const [name, setName] = useState('');
-  const [url, setUrl] = useState('');
-
+  const [url, setUrl] = useState(''); // Pour M3U
+  const [serverUrl, setServerUrl] = useState(''); // Pour Xtream
+  const [username, setUsername] = useState(''); // Pour Xtream
+  const [password, setPassword] = useState(''); // Pour Xtream
   const [editingProfile, setEditingProfile] = useState<IPTVProfile | null>(null);
 
+  useEffect(() => {
+    if (editingProfile) {
+      setName(editingProfile.name);
+      setProfileType(editingProfile.type);
+      if (editingProfile.type === 'm3u') {
+        setUrl(editingProfile.url);
+      } else if (editingProfile.type === 'xtream') {
+        setServerUrl(editingProfile.serverUrl);
+        setUsername(editingProfile.username);
+        setPassword(editingProfile.password || '');
+      }
+    }
+  }, [editingProfile]);
+
   const handleSubmit = () => {
-    if (!name.trim() || !url.trim()) {
-      Alert.alert("Erreur", "Veuillez remplir le nom et l'URL");
+    if (!name.trim()) {
+      Alert.alert("Erreur", "Veuillez remplir le nom du profil");
+      return;
+    }
+    let profileData: IPTVProfile;
+    if (profileType === 'm3u') {
+      if (!url.trim()) {
+        Alert.alert("Erreur", "Veuillez remplir l'URL M3U");
+        return;
+      }
+      profileData = {
+        id: editingProfile?.id || Date.now().toString(),
+        name, type: 'm3u', url,
+      };
+    } else if (profileType === 'xtream') {
+      if (!serverUrl.trim() || !username.trim()) {
+        Alert.alert("Erreur", "Veuillez remplir le Serveur et l'Utilisateur");
+        return;
+      }
+      profileData = {
+        id: editingProfile?.id || Date.now().toString(),
+        name, type: 'xtream', serverUrl, username, password,
+      };
+    } else {
+      Alert.alert("Erreur", "Type de profil non supporté");
       return;
     }
 
     if (editingProfile) {
-      
-      const updatedProfile: M3UProfile = {
-        ...(editingProfile as M3UProfile),
-        name: name,
-        url: url,
-      };
-      editProfile(updatedProfile);
+      editProfile(profileData);
       Alert.alert("Succès", `Profil "${name}" mis à jour.`);
     } else {
-      
-      const newM3UProfile: M3UProfile = {
-        id: Date.now().toString(),
-        name,
-        type: 'm3u',
-        url,
-      };
-      addProfile(newM3UProfile);
+      addProfile(profileData);
     }
-        
     cancelEdit();
   };
-    
-  const startEditing = (profile: IPTVProfile) => {
-    
-    if (profile.type === 'm3u') {
-      setEditingProfile(profile);
-      setName(profile.name);
-      setUrl(profile.url);
-    } else {
-      Alert.alert("Non supporté", "L'édition des profils Xtream/Stalker n'est pas encore implémentée.");
-    }
-  };
   
+  const startEditing = (profile: IPTVProfile) => {
+    if (profile.type === 'stalker') {
+      Alert.alert("Non supporté", "L'édition des profils Stalker n'est pas encore implémentée.");
+      return;
+    }
+    setEditingProfile(profile);
+  };
+
   const cancelEdit = () => {
     setEditingProfile(null);
-    setName('');
-    setUrl('');
+    setName(''); setUrl(''); setServerUrl(''); setUsername(''); setPassword('');
+    setProfileType('m3u');
   };
 
   const handleLoadProfile = (profile: IPTVProfile) => {
@@ -83,17 +102,8 @@ const PlaylistManager = () => {
   };
 
   const handleDeleteProfile = (profile: IPTVProfile) => {
-    Alert.alert(
-      "Supprimer le profil",
-      `Êtes-vous sûr de vouloir supprimer "${profile.name}" ?`,
-      [
-        { text: "Annuler", style: "cancel" },
-        { 
-          text: "Supprimer", 
-          style: "destructive", 
-          onPress: () => removeProfile(profile.id) 
-        }
-      ]
+    Alert.alert( "Supprimer le profil", `Êtes-vous sûr de vouloir supprimer "${profile.name}" ?`,
+      [ { text: "Annuler", style: "cancel" }, { text: "Supprimer", style: "destructive", onPress: () => removeProfile(profile.id) } ]
     );
   };
   
@@ -104,25 +114,13 @@ const PlaylistManager = () => {
         <Text style={styles.profileType}>{item.type.toUpperCase()}</Text>
       </View>
       <View style={styles.profileActions}>
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.loadButton]} 
-          onPress={() => handleLoadProfile(item)}
-          disabled={isLoading}
-        >
+        <TouchableOpacity style={[styles.actionButton, styles.loadButton]} onPress={() => handleLoadProfile(item)} disabled={isLoading}>
           <Text style={styles.actionButtonText}>Charger</Text>
         </TouchableOpacity>
-                
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.editButton]} 
-          onPress={() => startEditing(item)}
-        >
+        <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => startEditing(item)}>
           <Text style={styles.actionButtonText}>Éditer</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.deleteButton]} 
-          onPress={() => handleDeleteProfile(item)}
-        >
+        <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => handleDeleteProfile(item)}>
           <Text style={styles.actionButtonText}>X</Text>
         </TouchableOpacity>
       </View>
@@ -131,38 +129,54 @@ const PlaylistManager = () => {
 
   return (
     <View style={styles.container}>
-            
-      <Text style={styles.title}>
-        {editingProfile ? "Modifier le Profil" : "Ajouter un Profil M3U"}
-      </Text>
+      <Text style={styles.title}>{editingProfile ? "Modifier le Profil" : "Ajouter un Profil"}</Text>
+      
+      <Text style={styles.label}>Type de Profil</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={profileType}
+          onValueChange={(itemValue) => setProfileType(itemValue as ProfileType)}
+          style={styles.picker}
+          dropdownIconColor="#FFF"
+          enabled={!editingProfile}
+        >
+          {/* --- CORRECTION DU STYLE (blanc sur blanc) --- */}
+          <Picker.Item label="Playlist M3U" value="m3u" color={Platform.OS === 'android' ? '#000' : '#FFF'} />
+          <Picker.Item label="Xtream Codes" value="xtream" color={Platform.OS === 'android' ? '#000' : '#FFF'} />
+          <Picker.Item label="Stalker (MAC)" value="stalker" color={Platform.OS === 'android' ? '#888' : '#888'} enabled={false} />
+        </Picker>
+      </View>
+      
+      <Text style={styles.label}>Nom du Profil</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nom du profil (ex: Mon FAI)"
+        placeholder="Ex: Mon FAI"
         value={name}
         onChangeText={setName}
         placeholderTextColor="#888"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="URL du fichier M3U"
-        value={url}
-        onChangeText={setUrl}
-        autoCapitalize="none"
-        keyboardType="url"
-        placeholderTextColor="#888"
-      />
+
+      {profileType === 'm3u' && (
+        <>
+          <Text style={styles.label}>URL M3U</Text>
+          <TextInput style={styles.input} placeholder="http://..." value={url} onChangeText={setUrl} autoCapitalize="none" keyboardType="url" placeholderTextColor="#888" />
+        </>
+      )}
+
+      {profileType === 'xtream' && (
+        <>
+          <Text style={styles.label}>URL du Serveur (avec http:// et port)</Text>
+          <TextInput style={styles.input} placeholder="http://domaine.com:80" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" keyboardType="url" placeholderTextColor="#888" />
+          <Text style={styles.label}>Nom d'utilisateur</Text>
+          <TextInput style={styles.input} placeholder="Utilisateur" value={username} onChangeText={setUsername} autoCapitalize="none" placeholderTextColor="#888" />
+          <Text style={styles.label}>Mot de passe</Text>
+          <TextInput style={styles.input} placeholder="Mot de passe" value={password} onChangeText={setPassword} autoCapitalize="none" secureTextEntry placeholderTextColor="#888" />
+        </>
+      )}
+      
       <View style={styles.formButtons}>
-        <Button 
-          title={editingProfile ? "Sauvegarder" : "Ajouter"} 
-          onPress={handleSubmit} 
-        />
-        {editingProfile && (
-          <Button 
-            title="Annuler" 
-            onPress={cancelEdit} 
-            color="#FF3B30"
-          />
-        )}
+        <Button title={editingProfile ? "Sauvegarder" : "Ajouter"} onPress={handleSubmit} />
+        {editingProfile && (<Button title="Annuler" onPress={cancelEdit} color="#FF3B30" />)}
       </View>
 
       <View style={styles.divider} />
@@ -179,14 +193,13 @@ const PlaylistManager = () => {
         data={profiles}
         renderItem={renderProfileItem}
         keyExtractor={(item) => item.id}
-        ListEmptyComponent={
-          !isLoading ? <Text style={styles.emptyText}>Aucun profil sauvegardé.</Text> : null
-        }
+        ListEmptyComponent={ !isLoading ? <Text style={styles.emptyText}>Aucun profil sauvegardé.</Text> : null }
       />
     </View>
   );
 };
 
+// --- STYLES MIS À JOUR ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -199,6 +212,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#FFF',
   },
+  label: {
+    color: '#AAA',
+    fontSize: 12,
+    marginBottom: 4,
+    marginLeft: 2,
+  },
   input: {
     height: 44,
     borderColor: '#444',
@@ -208,6 +227,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#222',
     color: '#FFF',
+  },
+  pickerContainer: {
+    borderColor: '#444',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: '#222',
+  },
+  picker: {
+    height: 44,
+    width: '100%',
+    color: '#FFF', // Couleur du texte SÉLECTIONNÉ
   },
   formButtons: {
     flexDirection: 'row',
@@ -263,7 +294,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: '#FFF',
     fontWeight: 'bold',
-    fontSize: 12, // Réduit
+    fontSize: 12,
   },
   loadingContainer: {
     alignItems: 'center',

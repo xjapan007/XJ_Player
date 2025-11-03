@@ -65,7 +65,13 @@ Once the crash is fixed, here is what we need to build. Help on any of these ite
 
 ---
 
-## 🛠️ Getting Started (How to run the project)
+## 🛠️ Getting Started (Development Build - VLC Player)
+
+**IMPORTANT:** This project now uses a native VLC library (`react-native-vlc-media-player`) to fix audio/codec issues. You can **no longer** run this project with the standard Expo Go app.
+
+You must build a custom development client.
+
+### 1. First-Time Setup
 
 1.  Clone this repository:
     ```bash
@@ -79,11 +85,23 @@ Once the crash is fixed, here is what we need to build. Help on any of these ite
     ```bash
     npm install
     ```
-4.  Start the Expo server:
+4.  Log in to your Expo account (you'll need one):
     ```bash
-    npx expo start
+    npx expo login
     ```
-5.  Scan the QR code with the **Expo Go** app on your phone.
+5.  Build the development client for your platform (e.g., Android):
+    ```bash
+    eas build --profile development --platform android
+    ```
+6.  Expo will build an `.apk` file. Download and install it on your device.
+
+### 2. Running the App (Daily)
+
+1.  Start the development server:
+    ```bash
+    npx expo start --dev-client
+    ```
+2.  Scan the QR code with your **new "XJ_Player" app** (not Expo Go).
 
 ---
 

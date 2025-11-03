@@ -3,12 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   IPTVContextType, 
   IPTVProfile, 
+  XtreamProfile, 
   Channel, 
   Movie, 
   Series,
   Season,
   Episode
-} from '../types';
+} from '../types'; 
 
 const seriesRegex = /(.*?) S(\d+) E(\d+)/i;
 const PROFILES_STORAGE_KEY = 'IPTV_PROFILES';
@@ -97,7 +98,8 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await loadM3U(profile.url);
       } 
       else if (profile.type === 'xtream') {
-        console.warn("Chargement Xtream non implémenté");
+        
+        await loadXtream(profile); 
       }
       else if (profile.type === 'stalker') {
         console.warn("Chargement Stalker non implémenté");
@@ -110,7 +112,7 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   };
-
+  
   const unloadProfile = () => {
     setCurrentProfile(null);
     setChannels([]);
@@ -210,6 +212,84 @@ export const IPTVProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const series = Array.from(seriesMap.values());
     return { channels, movies, series };
   };
+  
+  // --- NOUVELLE LOGIQUE DE CHARGEMENT XTREAM ---
+  const loadXtream = async (profile: IPTVProfile) => {
+    // S'assurer que le profil est de type Xtream
+    if (profile.type !== 'xtream') return;
+
+    const { serverUrl, username, password } = profile;
+    const baseUrl = `${serverUrl}/player_api.php?username=${username}&password=${password}`;
+
+    // 1. Authentification
+    let authResponse;
+    try {
+      authResponse = await fetch(baseUrl);
+      if (!authResponse.ok) throw new Error(`Erreur serveur: ${authResponse.status}`);
+      
+      const authData = await authResponse.json();
+      if (authData.user_info.auth === 0) {
+        throw new Error("Authentification échouée. Vérifiez vos identifiants.");
+      }
+    } catch (e: any) {
+      throw new Error(`Connexion au serveur échouée: ${e.message}`);
+    }
+
+    // 2. Récupérer tous les types de flux
+    const allStreamsUrl = `${baseUrl}&action=get_live_streams`;
+    const vodStreamsUrl = `${baseUrl}&action=get_vod_streams`;
+    const seriesStreamsUrl = `${baseUrl}&action=get_series`;
+
+    try {
+      const [liveRes, vodRes, seriesRes] = await Promise.all([
+        fetch(allStreamsUrl),
+        fetch(vodStreamsUrl),
+        fetch(seriesStreamsUrl)
+      ]);
+      
+      const liveData = await liveRes.json();
+      const vodData = await vodRes.json();
+      const seriesData = await seriesRes.json();
+      
+      // 3. Parser les données
+      
+      const parsedChannels: Channel[] = liveData.map((channel: any): Channel => ({
+        id: channel.stream_id.toString(),
+        name: channel.name,
+        url: `${serverUrl}/live/${username}/${password}/${channel.stream_id}.${channel.stream_type || 'ts'}`,
+        logo: channel.stream_icon,
+        group: channel.category_name || 'Live TV',
+        tvgId: channel.epg_channel_id,
+      }));
+      setChannels(parsedChannels);
+
+      const parsedMovies: Movie[] = vodData.map((movie: any): Movie => ({
+        id: movie.stream_id.toString(),
+        name: movie.name,
+        streamUrl: `${serverUrl}/movie/${username}/${password}/${movie.stream_id}.${movie.container_extension}`,
+        cover: movie.stream_icon,
+        group: movie.category_name || 'VOD',
+      }));
+      setMovies(parsedMovies);
+      
+      const parsedSeries: Series[] = seriesData.map((series: any): Series => ({
+        id: series.series_id.toString(),
+        name: series.name,
+        cover: series.cover,
+        group: series.category_name || 'Séries',
+        seasons: [] // Vide pour l'instant
+      }));
+      setSeries(parsedSeries);
+      // Note: La logique pour charger les saisons/épisodes de Xtream
+      // doit être ajoutée dans 'SeasonScreen.tsx' (un appel API
+      // au moment où l'utilisateur clique sur la série).
+
+    } catch (e: any) {
+      console.error("Erreur lors de la récupération des flux Xtream", e);
+      throw new Error("Impossible de charger les listes de flux.");
+    }
+  };
+  // --- FIN DE LA LOGIQUE XTREAM ---
   
   const playStream = (stream: { url: string; id: string; }) => {
     setCurrentStream(stream);
